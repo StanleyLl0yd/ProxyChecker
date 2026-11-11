@@ -1,34 +1,52 @@
 # ProxyChecker
 
-Native, standalone Windows proxy-route monitor. Planned replacement for the `Watch-VLESS.ps1` PowerShell monitor.
+**Native portable Windows monitor for HTTP proxy routes and VLESS connectivity.**
 
-> **Status: M0 bootstrap / native build foundation only.** Monitoring, tray, registry settings and Healthchecks heartbeats are specified but **not yet implemented**. Do not use the prototype as a production monitor.
+> **Status:** M1–M3 implementation is under review. A Windows CI build is available from GitHub Actions, but this is a **test preview, not an accepted production release**. External route reachability is tested; the app does not directly inspect Podkop's internal VLESS state.
 
-## Requirements
+## Why
 
-- Native **C++23 / Win32**, portable single `ProxyChecker.exe`, Windows x64, MSVC **static CRT `/MT`**, no .NET, Qt, Electron, Python, PowerShell or additional redistributables. Windows system DLLs are allowed.
-- Native Windows UI with tray status; visible network errors, detailed on-demand diagnostics and daily logs.
-- Editable HTTP proxy address (default `172.16.136.19:3128`), persisted between launches.
-- Probe through the configured proxy using **WinHTTP** (not ICMP ping; not `curl.exe`). Four independent HTTPS targets: Cloudflare, Microsoft, Telegram and Google. One success is enough for `UP`; prevent false `DOWN` alarms with a configurable confirmation window (default 90 seconds).
-- Healthchecks.io integration: editable ping URL, enabled toggle, heartbeat interval (default 60 s), timeout, proxy-routing option (default ON). Heartbeats **must stop on confirmed loss of reachability**; do not indicate healthy status when the monitored path is down.
-- Healthchecks.io sends DOWN/UP notifications independently of the broken tunnel; the app does not need a local Telegram token to send DOWN alerts.
-- All **configuration and persistent runtime state** in `HKCU\Software\ProxyChecker`. Healthchecks ping URL and other credentials protected with Windows DPAPI (CurrentUser); no INI/JSON/config files.
-- Detailed diagnostic **logs** are files under `%LOCALAPPDATA%\\ProxyChecker\\Logs` (logs are not settings). Redact sensitive URLs, tokens and credentials.
-- Graceful startup/shutdown, explicit status `UP / SUSPECT / DOWN / UNKNOWN`, no notification spam, safe failures, tests and Windows CI.
+A Windows computer can connect through an OpenWrt/Podkop HTTP proxy that sends all traffic into a VLESS tunnel. When the tunnel is down, locally sending Telegram alerts through that same proxy is impossible. ProxyChecker instead sends heartbeat signals through the **verified proxy route** to Healthchecks.io; an independent Healthchecks.io server alerts Telegram if signals stop and announces recovery when they resume.
 
-## Build (once sources are implemented)
+## Current capabilities (PR #2)
+
+- Win32/C++23 UI with compact dashboard, system tray, single-instance lock and editable settings.
+- Explicit HTTP proxy, default `172.16.136.19:3128`, editable at runtime.
+- Four WinHTTP HTTPS targets: **Cloudflare**, **Microsoft**, **Telegram**, **Google**. They are tested in order until one succeeds; the Diagnose button tests all four. A single failed site does not mean VLESS is down.
+- States `UNKNOWN`, `UP`, `SUSPECT`, `DOWN`; 90s continuous failure before DOWN; two verified successes for UP.
+- Detailed HTTP status, WinHTTP error, duration, timestamp; rolling local diagnostic/event logs.
+- Optional Healthchecks.io heartbeat (default every 60 seconds) using the **monitored proxy only**, sent only in confirmed UP state.
+- All settings in `HKCU\Software\ProxyChecker`; Healthchecks ping URL encrypted via Windows DPAPI CurrentUser; logs in `%LOCALAPPDATA%\ProxyChecker\Logs` contain no URLs or tokens.
+- Native Win32 only, MSVC /MT, no .NET, Electron, Qt, or PowerShell runtime.
+
+## Build
+
+Requires Windows 10/11 x64, VS 2022 with MSVC C++ tools and CMake:
 
 ```powershell
-cmake -S . -B build -A x64
+cmake -S . -B build -A x64 -DBUILD_TESTING=ON
 cmake --build build --config Release
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-This repository currently includes a **nonfunctional Win32 foundation window** to validate the toolchain and CI; it is not the finished monitor.
+The resulting program is `build\Release\ProxyChecker.exe`. It can be run without an installer. The Windows CI workflow uploads a test executable artifact.
 
-## Work plan
+## Setup
 
-See [ROADMAP](docs/ROADMAP.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [SECURITY](SECURITY.md) and [CONTRIBUTING](CONTRIBUTING.md).
+1. Start the EXE, open **Settings**, enter proxy host and port if different from default, then save.
+2. Press **Diagnose** to test all four external HTTPS services and inspect the log for exact errors.
+3. Follow **[docs/HEALTHCHECKS.md](docs/HEALTHCHECKS.md)** to create a check and add HealthchecksBot to Telegram.
+4. Enter the personal ping URL in Settings (do **not** commit or disclose it), enable heartbeats, save, and verify an accepted ping.
+5. Keep the Windows computer awake; **Exit** from tray stops heartbeats and will eventually produce a DOWN alert. Hiding the window keeps monitoring active.
 
-## License
+**Healthchecks is a remote dead-man switch:** a missing heartbeat also occurs if the PC sleeps, the program exits, or the local network is down. This does not uniquely diagnose VLESS. Do not infer a valid VLESS tunnel if OpenWrt silently falls back to a direct route.
 
-No license has been selected. Public source visibility does **not** automatically grant a license to reuse the code. The owner intends to switch the repository to private after creation.
+## Roadmap and security
+
+- [ROADMAP](docs/ROADMAP.md)
+- [ARCHITECTURE](docs/ARCHITECTURE.md)
+- [Healthchecks setup](docs/HEALTHCHECKS.md)
+- [SECURITY](SECURITY.md)
+- [CONTRIBUTING](CONTRIBUTING.md)
+
+**License:** No license selected. Public visibility is not permission to republish or distribute the source. The owner intends to change repository visibility to Private.

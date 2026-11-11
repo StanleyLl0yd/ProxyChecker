@@ -45,7 +45,8 @@ public:
         } else {
             successes_ = 0;
             if (!failureStart_) failureStart_ = now;
-            if (now - *failureStart_ >= downPeriod_) {
+            // An outage remains DOWN until recovery has been confirmed.
+            if (status_ == Status::Down || now - *failureStart_ >= downPeriod_) {
                 status_ = Status::Down;
             } else {
                 status_ = Status::Suspect;
@@ -67,5 +68,12 @@ private:
     std::chrono::seconds downPeriod_;
     int recoveryCount_;
 };
+
+inline bool ShouldSendHeartbeat(Status state, bool enabled, bool hasUrl,
+    StateTracker::Time now, StateTracker::Time last, int intervalSeconds) noexcept {
+    if (state != Status::Up || !enabled || !hasUrl) return false;
+    if (last == StateTracker::Time::min()) return true;
+    return now - last >= std::chrono::seconds(std::clamp(intervalSeconds, 30, 3600));
+}
 
 }  // namespace proxychecker

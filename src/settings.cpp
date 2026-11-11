@@ -127,6 +127,11 @@ bool ValidHealthchecksUrl(const std::wstring& url) {
             return false;
     }
     if (slash == 0 || slash == path.size() - 1) return false;
+    // Reject reserved action suffixes; an accidental /fail must never be sent.
+    if (slash != std::wstring::npos) {
+        const auto suffix = path.substr(slash + 1);
+        if (suffix == L"start" || suffix == L"fail" || suffix == L"log") return false;
+    }
     return true;
 }
 

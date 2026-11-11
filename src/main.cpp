@@ -221,7 +221,7 @@ void SaveSettings(HWND window) {
     RefreshDashboard();
 }
 
-LRESULT CALLBACK SettingsProc(HWND window, UINT msg, WPARAM wp, LPARAM /*lp*/) {
+LRESULT CALLBACK SettingsProc(HWND window, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
     case WM_CREATE: {
         Label(window, L"All settings are stored in HKCU\\Software\\ProxyChecker.", 20, 12, 730, 24);
@@ -279,7 +279,7 @@ LRESULT CALLBACK SettingsProc(HWND window, UINT msg, WPARAM wp, LPARAM /*lp*/) {
         return 0;
     default: break;
     }
-    return DefWindowProcW(window, msg, wp, 0);
+    return DefWindowProcW(window, msg, wp, lp);
 }
 
 void OpenSettings() {

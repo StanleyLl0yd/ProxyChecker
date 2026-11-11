@@ -223,10 +223,9 @@ void Engine::Worker() {
         Notify();
 
         // A heartbeat may only follow verified, current, healthy proxy traffic.
-        if (tracker.state() == Status::Up && local.healthchecksEnabled &&
-            !local.healthchecksUrl.empty() &&
-            (lastHeartbeat == Clock::time_point::min() ||
-             now - lastHeartbeat >= std::chrono::seconds(local.heartbeatIntervalSeconds))) {
+        if (ShouldSendHeartbeat(tracker.state(), local.healthchecksEnabled,
+            !local.healthchecksUrl.empty(), now, lastHeartbeat,
+            static_cast<int>(local.heartbeatIntervalSeconds))) {
             lastHeartbeat = now;
             const auto result = HttpGet(local.healthchecksUrl, local,
                 local.heartbeatTimeoutSeconds, true);

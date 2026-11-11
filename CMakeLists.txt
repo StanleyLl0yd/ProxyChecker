@@ -27,4 +27,12 @@ if(BUILD_TESTING)
     add_executable(proxychecker-state-tests tests/state_tests.cpp)
     target_compile_options(proxychecker-state-tests PRIVATE /W4 /WX /permissive-)
     add_test(NAME state-machine COMMAND proxychecker-state-tests)
+
+    add_executable(proxychecker-settings-tests
+        tests/settings_tests.cpp src/settings.cpp)
+    target_compile_definitions(proxychecker-settings-tests PRIVATE
+        UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+    target_compile_options(proxychecker-settings-tests PRIVATE /W4 /WX /permissive- /utf-8)
+    target_link_libraries(proxychecker-settings-tests PRIVATE crypt32 advapi32)
+    add_test(NAME config-validation COMMAND proxychecker-settings-tests)
 endif()

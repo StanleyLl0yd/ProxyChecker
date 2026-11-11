@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Configure MSVC x64
         run: cmake -S . -B build -A x64 -DBUILD_TESTING=ON
       - name: Build native Release

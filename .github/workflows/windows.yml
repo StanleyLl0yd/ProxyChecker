@@ -19,6 +19,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Configure MSVC x64
-        run: cmake -S . -B build -A x64
+        run: cmake -S . -B build -A x64 -DBUILD_TESTING=ON
       - name: Build native Release
         run: cmake --build build --config Release --parallel
+      - name: Run state-machine tests
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Check static CRT
+        shell: pwsh
+        run: |
+          $exe = "build/Release/ProxyChecker.exe"
+          if (!(Test-Path $exe)) { throw "EXE missing" }
+          $dumpbin = (Get-Command dumpbin.exe -ErrorAction SilentlyContinue)
+          if ($dumpbin) {
+            $deps = & $dumpbin.Source /dependents $exe | Out-String
+            if ($deps -match 'VCRUNTIME\d*\.dll|MSVCP\d*\.dll|ucrtbase\.dll') {
+              throw "Dynamic MSVC CRT dependency detected: $deps"
+            }
+          }
+      - name: Upload prototype exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProxyChecker-windows-x64
+          path: build/Release/ProxyChecker.exe
+          if-no-files-found: error

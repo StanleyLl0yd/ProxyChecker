@@ -1,0 +1,22 @@
+name: Bug report
+description: Report incorrect ProxyChecker behavior
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: Redact tokens, ping URLs, chat IDs and any credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Windows version and ProxyChecker version

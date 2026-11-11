@@ -1,0 +1,35 @@
+# Windows / Visual Studio / CMake
+/build/
+/out/
+/.vs/
+/CMakeUserPresets.json
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.ipch
+*.tlog
+*.lastbuildstate
+*.exe
+*.dll
+*.lib
+*.exp
+*.msi
+*.msix
+*.zip
+# Runtime data, diagnostics, secrets
+*.log
+*.dmp
+*.etl
+*.secret
+*.secrets
+*.token
+.env
+.env.*
+!*.example

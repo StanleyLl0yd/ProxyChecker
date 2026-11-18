@@ -37,7 +37,7 @@ jobs:
             }
           }
       - name: Upload prototype exe
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ProxyChecker-windows-x64
           path: build/Release/ProxyChecker.exe

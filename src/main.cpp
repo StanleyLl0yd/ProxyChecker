@@ -241,12 +241,12 @@ LRESULT CALLBACK SettingsProc(HWND window, UINT msg, WPARAM wp, LPARAM lp) {
         Label(window, L"Successful probes required to recover (1-10)", 38, 249, 370, 24);
         Edit(window, SettingRecovery, Number(gConfig.recoverySuccesses), 430, 247, 110, 26);
 
-        Group(window, L"Healthchecks.io (independent Telegram DOWN/UP alerts)", 20, 317, 710, 202);
+        Group(window, L"Heartbeat: PingZen / Healthchecks (Telegram DOWN/UP)", 20, 317, 710, 202);
         AddControl(window, L"BUTTON", L"Send heartbeats after confirmed UP",
             BS_AUTOCHECKBOX | WS_TABSTOP, 38, 343, 480, 26, SettingHealthEnabled);
         if (gConfig.healthchecksEnabled)
             SendDlgItemMessageW(window, SettingHealthEnabled, BM_SETCHECK, BST_CHECKED, 0);
-        Label(window, L"Healthchecks Ping URL (https://hc-ping.com/...)",
+        Label(window, L"PingZen / Healthchecks HTTPS ping URL",
             38, 375, 510, 21);
         Edit(window, SettingHealthUrl, L"", 38, 399, 660, 26, true);
         Label(window, gConfig.healthchecksUrl.empty() ?
@@ -323,7 +323,7 @@ LRESULT CALLBACK MainProc(HWND window, UINT msg, WPARAM wp, LPARAM lp) {
         Label(window, L"", 142, 123, 635, 42, MainLastProbe);
         Label(window, L"Transition:", 42, 161, 95, 22);
         Label(window, L"", 142, 161, 635, 22, MainLastState);
-        Group(window, L"Healthchecks.io", 20, 205, 790, 88);
+        Group(window, L"External heartbeat", 20, 205, 790, 88);
         Label(window, L"", 42, 238, 740, 44, MainHealthchecks);
         Group(window, L"Diagnostics", 20, 304, 790, 229);
         AddControl(window, L"EDIT", L"Click Diagnose to test all endpoints.",

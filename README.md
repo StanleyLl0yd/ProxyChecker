@@ -6,7 +6,7 @@
 
 ## Why
 
-A Windows computer can connect through an OpenWrt/Podkop HTTP proxy that sends all traffic into a VLESS tunnel. When the tunnel is down, locally sending Telegram alerts through that same proxy is impossible. ProxyChecker instead sends heartbeat signals through the **verified proxy route** to Healthchecks.io; an independent Healthchecks.io server alerts Telegram if signals stop and announces recovery when they resume.
+A Windows computer can connect through an OpenWrt/Podkop HTTP proxy that sends all traffic into a VLESS tunnel. When the tunnel is down, locally sending Telegram alerts through that same proxy is impossible. ProxyChecker instead sends heartbeat signals through the **verified proxy route** to PingZen (or Healthchecks.io); an independent monitoring service alerts Telegram if signals stop and announces recovery when they resume.
 
 ## Current capabilities (PR #2)
 
@@ -15,8 +15,8 @@ A Windows computer can connect through an OpenWrt/Podkop HTTP proxy that sends a
 - Four WinHTTP HTTPS targets: **Cloudflare**, **Microsoft**, **Telegram**, **Google**. They are tested in order until one succeeds; the Diagnose button tests all four. A single failed site does not mean VLESS is down.
 - States `UNKNOWN`, `UP`, `SUSPECT`, `DOWN`; 90s continuous failure before DOWN; two verified successes for UP.
 - Detailed HTTP status, WinHTTP error, duration, timestamp; rolling local diagnostic/event logs.
-- Optional Healthchecks.io heartbeat (default every 60 seconds) using the **monitored proxy only**, sent only in confirmed UP state.
-- All settings in `HKCU\Software\ProxyChecker`; Healthchecks ping URL encrypted via Windows DPAPI CurrentUser; logs in `%LOCALAPPDATA%\ProxyChecker\Logs` contain no URLs or tokens.
+- Optional PingZen / Healthchecks.io heartbeat (default every 60 seconds) using the **monitored proxy only**, sent only in confirmed UP state.
+- All settings in `HKCU\Software\ProxyChecker`; Heartbeat ping URL encrypted via Windows DPAPI CurrentUser; logs in `%LOCALAPPDATA%\ProxyChecker\Logs` contain no URLs or tokens.
 - Native Win32 only, MSVC /MT, no .NET, Electron, Qt, or PowerShell runtime.
 
 ## Build
@@ -35,17 +35,18 @@ The resulting program is `build\Release\ProxyChecker.exe`. It can be run without
 
 1. Start the EXE, open **Settings**, enter proxy host and port if different from default, then save.
 2. Press **Diagnose** to test all four external HTTPS services and inspect the log for exact errors.
-3. Follow **[docs/HEALTHCHECKS.md](docs/HEALTHCHECKS.md)** to create a check and add HealthchecksBot to Telegram.
+3. Follow **[docs/PINGZEN.md](docs/PINGZEN.md)** to configure a free PingZen heartbeat and Telegram alerts. Legacy Healthchecks instructions remain in [docs/HEALTHCHECKS.md](docs/HEALTHCHECKS.md).
 4. Enter the personal ping URL in Settings (do **not** commit or disclose it), enable heartbeats, save, and verify an accepted ping.
 5. Keep the Windows computer awake; **Exit** from tray stops heartbeats and will eventually produce a DOWN alert. Hiding the window keeps monitoring active.
 
-**Healthchecks is a remote dead-man switch:** a missing heartbeat also occurs if the PC sleeps, the program exits, or the local network is down. This does not uniquely diagnose VLESS. Do not infer a valid VLESS tunnel if OpenWrt silently falls back to a direct route.
+**The external heartbeat is a remote dead-man switch:** a missing heartbeat also occurs if the PC sleeps, the program exits, or the local network is down. This does not uniquely diagnose VLESS. Do not infer a valid VLESS tunnel if OpenWrt silently falls back to a direct route.
 
 ## Roadmap and security
 
 - [ROADMAP](docs/ROADMAP.md)
 - [ARCHITECTURE](docs/ARCHITECTURE.md)
-- [Healthchecks setup](docs/HEALTHCHECKS.md)
+- [PingZen setup](docs/PINGZEN.md)
+- [Legacy Healthchecks setup](docs/HEALTHCHECKS.md)
 - [SECURITY](SECURITY.md)
 - [CONTRIBUTING](CONTRIBUTING.md)
 

@@ -235,7 +235,7 @@ void Engine::Worker() {
                 L" WinHTTP=" + std::to_wstring(result.error) +
                 L" Time=" + std::to_wstring(result.milliseconds) + L"ms" +
                 L" " + result.details;
-            LogEvent(L"Healthchecks heartbeat " + description);
+            LogEvent(L"Heartbeat " + description);
             {
                 std::lock_guard lock(mutex_);
                 if (generation == generation_) snapshot_.lastHeartbeat = description;

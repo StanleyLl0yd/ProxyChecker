@@ -3,10 +3,10 @@
 - [x] **M0 — build foundation:** public repo created, initial MSVC C++23 Win32 scaffold compiled in GitHub Actions, active protected `main`, baseline documentation.
 - [x] **M1 — implemented (PR #2):** Win32 dashboard, system tray, editable proxy, all settings in HKCU, DPAPI for Healthchecks URL, single-instance; **Windows GUI acceptance pending**.
 - [x] **M2 — implemented (PR #2):** WinHTTP four-target HTTPS probes, explicit errors/latency, 90s outage confirmation, two-success recovery, local logs, state tests; **real proxy failure/recovery acceptance pending**.
-- [x] **M3 — implemented (PR #2):** PingZen / Healthchecks.io heartbeats over monitored proxy, disabled until configured, verified `200 OK`, only after confirmed UP, fail closed on missing check URL; **real PingZen Telegram DOWN/UP acceptance pending**.
+- [x] **M3 — implemented (PR #2):** PingZen / Healthchecks.io heartbeats over monitored proxy, disabled until configured, only after confirmed UP (Healthchecks: exact HTTP 200/`OK`; PingZen: HTTP 2xx), fail closed on missing check URL; **real PingZen Telegram DOWN/UP acceptance pending**.
 - [ ] **M4 — release preparation:** icon/UX polish, optional autostart, integration tests, security review, portable EXE versioned release and final acceptance.
 
-Checkboxes in M1–M3 mean implementation complete, **not accepted**. Acceptance requires physical Windows/OpenWrt/Healthchecks test.
+Checkboxes in M1–M3 mean implementation complete, **not accepted**. Acceptance requires physical Windows/OpenWrt/PingZen test.
 
 ## Acceptance checks
 

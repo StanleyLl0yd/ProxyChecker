@@ -22,5 +22,7 @@ bool LoadConfig(Config& config, std::wstring& error);
 bool SaveConfig(const Config& config, std::wstring& error);
 bool ValidateConfig(const Config& config, std::wstring& error);
 bool ValidHealthchecksUrl(const std::wstring& url);
+bool ValidPingZenUrl(const std::wstring& url);
+bool ValidHeartbeatUrl(const std::wstring& url);
 
 }  // namespace proxychecker

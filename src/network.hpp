@@ -15,7 +15,7 @@ struct HttpResult {
 };
 
 HttpResult HttpGet(const std::wstring& url, const Config& config,
-    DWORD timeoutSeconds, bool healthchecks = false);
+    DWORD timeoutSeconds, bool heartbeat = false);
 std::wstring SystemError(DWORD error);
 
 }  // namespace proxychecker

@@ -39,7 +39,7 @@ std::wstring SystemError(DWORD error) {
 }
 
 HttpResult HttpGet(const std::wstring& url, const Config& config,
-    DWORD timeoutSeconds, bool healthchecks) {
+    DWORD timeoutSeconds, bool heartbeat) {
     const auto started = std::chrono::steady_clock::now();
     HttpResult result;
     auto fail = [&](DWORD error, const wchar_t* stage) {
@@ -79,7 +79,7 @@ HttpResult HttpGet(const std::wstring& url, const Config& config,
             fail(GetLastError(), L"WinHttpSetTimeouts");
             break;
         }
-        // Never follow a redirect: a Healthchecks secret URL must not leave its intended host.
+        // Never follow redirects: a secret ping URL must not leave its intended host.
         DWORD redirect = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
         if (!WinHttpSetOption(request.value, WINHTTP_OPTION_REDIRECT_POLICY, &redirect, sizeof(redirect))) {
             fail(GetLastError(), L"WinHttpSetOption");
@@ -101,8 +101,16 @@ HttpResult HttpGet(const std::wstring& url, const Config& config,
         }
         result.status = status;
         result.reachable = status >= 200 && status < 400;
-        if (!healthchecks) {
+        if (!heartbeat) {
             result.details = L"HTTPS response";
+            break;
+        }
+        // PingZen documents plain GET heartbeat; no response body is specified.
+        if (url.starts_with(L"https://pingzen.dev/api/v1/ping/")) {
+            result.heartbeatAccepted = status >= 200 && status < 300;
+            result.details = result.heartbeatAccepted ?
+                L"PingZen heartbeat acknowledged by HTTP" :
+                L"PingZen returned HTTP " + std::to_wstring(status);
             break;
         }
         // hc-ping.com may reply HTTP 200 with text "not found" or "rate limited":

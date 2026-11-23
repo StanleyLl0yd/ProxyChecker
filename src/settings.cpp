@@ -135,6 +135,28 @@ bool ValidHealthchecksUrl(const std::wstring& url) {
     return true;
 }
 
+bool ValidPingZenUrl(const std::wstring& url) {
+    constexpr wchar_t prefix[] = L"https://pingzen.dev/api/v1/ping/";
+    const std::wstring pre = prefix;
+    if (url.compare(0, pre.size(), pre) != 0) return false;
+    const auto path = url.substr(pre.size());
+    if (path.empty() || path.size() > 180) return false;
+    const auto slash = path.find(L'/');
+    if (slash == std::wstring::npos || slash == 0 || slash == path.size() - 1 ||
+        path.find(L'/', slash + 1) != std::wstring::npos) return false;
+    // Exact GET endpoint: /{key}/{slug}; no action, query or fragment.
+    for (const auto c : path) {
+        if (!((c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z') ||
+              (c >= L'0' && c <= L'9') || c == L'-' || c == L'_' || c == L'/'))
+            return false;
+    }
+    return true;
+}
+
+bool ValidHeartbeatUrl(const std::wstring& url) {
+    return ValidHealthchecksUrl(url) || ValidPingZenUrl(url);
+}
+
 bool ValidateConfig(const Config& c, std::wstring& error) {
     if (c.proxyHost.empty() || c.proxyHost.size() > 253 ||
         !std::all_of(c.proxyHost.begin(), c.proxyHost.end(), SafeHostChar)) {
@@ -154,15 +176,15 @@ bool ValidateConfig(const Config& c, std::wstring& error) {
     }
     if (c.heartbeatIntervalSeconds < 30 || c.heartbeatIntervalSeconds > 3600 ||
         c.heartbeatTimeoutSeconds < 3 || c.heartbeatTimeoutSeconds > 30) {
-        error = L"Healthchecks interval must be 30-3600s and timeout 3-30s.";
+        error = L"Heartbeat interval must be 30-3600s and timeout 3-30s.";
         return false;
     }
-    if (!c.healthchecksUrl.empty() && !ValidHealthchecksUrl(c.healthchecksUrl)) {
-        error = L"Use only the full HTTPS check ping URL from hc-ping.com (no query or suffix).";
+    if (!c.healthchecksUrl.empty() && !ValidHeartbeatUrl(c.healthchecksUrl)) {
+        error = L"Use the exact HTTPS heartbeat URL from pingzen.dev or hc-ping.com (no query or action suffix).";
         return false;
     }
     if (c.healthchecksEnabled && c.healthchecksUrl.empty()) {
-        error = L"Enter a Healthchecks ping URL before enabling heartbeats.";
+        error = L"Enter a heartbeat URL before enabling heartbeats.";
         return false;
     }
     return true;

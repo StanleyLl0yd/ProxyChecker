@@ -28,12 +28,32 @@ int main() {
     Require(!ValidHealthchecksUrl(L"https://hc-ping.com/uuid?create=1"), "no query");
     Require(!ValidHealthchecksUrl(L"https://hc-ping.com/uuid/"), "no trailing slash");
     Require(!ValidHealthchecksUrl(L"https://hc-ping.com/uuid/slug/start"), "no multi suffix");
+    Require(ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/abc123/proxychecker-vless"), "PingZen URL");
+    Require(ValidHeartbeatUrl(L"https://pingzen.dev/api/v1/ping/abc123/proxychecker-vless"),
+            "generic heartbeat accepts PingZen");
+    Require(ValidHeartbeatUrl(L"https://hc-ping.com/00000000-0000-4000-8000-000000000000"),
+            "generic heartbeat keeps Healthchecks");
+    Require(!ValidPingZenUrl(L"http://pingzen.dev/api/v1/ping/key/slug"), "PingZen requires TLS");
+    Require(!ValidPingZenUrl(L"https://other.pingzen.dev/api/v1/ping/key/slug"), "reject subdomain");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev.evil.com/api/v1/ping/key/slug"), "reject spoof host");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev:443/api/v1/ping/key/slug"), "reject port");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key"), "missing slug");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug/fail"), "reject fail");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug/success"), "reject success");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug/start"), "reject start");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug/1"), "reject exit code");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug?x=1"), "reject query");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug#fragment"), "reject fragment");
+    Require(!ValidPingZenUrl(L"https://pingzen.dev/api/v1/ping/key/slug/"), "reject trailing slash");
     c.healthchecksEnabled = true;
     error.clear();
     Require(!ValidateConfig(c, error), "enabled requires URL");
     c.healthchecksUrl = L"https://hc-ping.com/00000000-0000-4000-8000-000000000000";
     error.clear();
     Require(ValidateConfig(c, error), "enabled valid");
+    c.healthchecksUrl = L"https://pingzen.dev/api/v1/ping/abc123/proxychecker-vless";
+    error.clear();
+    Require(ValidateConfig(c, error), "enabled PingZen valid");
     c.proxyHost = L"example.org bad";
     error.clear();
     Require(!ValidateConfig(c, error), "invalid host");
